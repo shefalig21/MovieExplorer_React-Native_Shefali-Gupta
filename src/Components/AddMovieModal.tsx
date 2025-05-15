@@ -7,7 +7,7 @@ import { AddMovieModalProps,MovieFormData } from '../types/MovieFormTYpes';
 import Toast from 'react-native-toast-message';
 
 
-const AddMovieModal = ({ visible, onClose }:AddMovieModalProps) => {
+const AddMovieModal = ({ visible,onClose,testID }:AddMovieModalProps) => {
   const [form, setForm] = useState<MovieFormData>({
     title: '',genre: '',release_year: '',rating: '',director: '',duration: '',streaming_platform: '',main_lead: '',description: '',premium: false,});
 
@@ -85,7 +85,7 @@ const handleSubmit = async () => {
 };
 
   return (
-    <Modal visible={visible} animationType="slide">
+    <Modal visible={visible} animationType="slide"  testID={testID}>
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} testID="back-button">

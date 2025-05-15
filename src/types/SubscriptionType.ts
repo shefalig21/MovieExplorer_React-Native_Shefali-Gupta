@@ -1,4 +1,4 @@
-export interface Plan{
+export interface PlanType{
   id: string;
   title: string;
   duration: string;

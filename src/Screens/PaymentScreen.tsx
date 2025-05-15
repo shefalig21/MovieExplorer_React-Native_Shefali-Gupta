@@ -3,10 +3,15 @@ import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
 import Toast from 'react-native-toast-message';
 import { confirmSubscriptionSuccess } from '../Api/SubscriptionAPI';
+import { RootStackParamList } from '../types/NavigationTypes';
+import { StackScreenProps } from '@react-navigation/stack';
 
-const PaymentScreen = ({ route, navigation }) => {
+type Props = StackScreenProps<RootStackParamList, 'Payment'>;
+
+const PaymentScreen = ({ route, navigation }: Props) => {
   const { checkoutUrl } = route.params;
   const [hasHandled, setHasHandled] = useState(false);
+  const [showWebView, setShowWebView] = useState(true);
 
   useEffect(() => {
     if (!checkoutUrl) {
@@ -19,19 +24,17 @@ const PaymentScreen = ({ route, navigation }) => {
     }
   }, [checkoutUrl]);
 
-  const handleNavigationChange = async (navState) => {
+  const handleNavigationChange = async (navState:any) => {
     const { url } = navState;
-
     if (hasHandled) return;
 
-    console.log("Current URL:", url);
+    if (url.includes('session_id=')) {
+      const sessionId = url.split('session_id=')[1].split('&')[0];
+      // console.log('Detected Session ID:', sessionId);
 
-    if (url.includes("session_id=")) {
-      const sessionId = url.split("session_id=")[1].split("&")[0];
-      console.log('Session ID:', sessionId);
-
-      if (url.includes("success")) {
+      if (url.includes('success')) {
         setHasHandled(true);
+        setShowWebView(false);
         try {
           await confirmSubscriptionSuccess(sessionId);
           Toast.show({
@@ -39,46 +42,49 @@ const PaymentScreen = ({ route, navigation }) => {
             text1: 'Payment Successful',
             text2: 'Thank you! Redirecting...',
           });
-          navigation.navigate("Main");
+
+          setTimeout(() => {
+            navigation.navigate('Main');
+          }, 1000);
         } catch (error) {
           Toast.show({
             type: 'error',
-            text1: 'Success Confirmation Failed',
-            text2: 'Please check your subscription status.',
+            text1: 'Subscription Error',
+            text2: 'We couldn\'t confirm your subscription.',
           });
           navigation.goBack();
         }
-        return;
       }
     }
 
     if (url.includes('failure')) {
       setHasHandled(true);
+      setShowWebView(false);
       Toast.show({
         type: 'error',
         text1: 'Payment Failed',
         text2: 'Your payment could not be completed.',
       });
       navigation.goBack();
-    } else {
-      console.log("Payment URL not recognized:", url);
     }
-  }
+  };
 
   return (
     <View style={styles.container}>
-      <WebView
-        source={{ uri: checkoutUrl }}
-        startInLoadingState
-        renderLoading={() => (
-          <ActivityIndicator
-            size="large"
-            color="#FF0000"
-            style={styles.loader}
-          />
-        )}
-        onNavigationStateChange={handleNavigationChange}
-      />
+      {showWebView ? (
+        <WebView
+          source={{ uri: checkoutUrl }}
+          startInLoadingState
+          renderLoading={() => (
+            <ActivityIndicator size="large" color="#FF0000" style={styles.loader} />
+          )}
+          onNavigationStateChange={handleNavigationChange}
+        />
+      ) : (
+        <View style={styles.loader}>
+          <ActivityIndicator size="large" color="#FF0000" />
+        </View>
+      )}
     </View>
   );
 };
@@ -95,6 +101,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -171,12 +207,13 @@ const styles = StyleSheet.create({
 //   }
 
 //   return (
-//     <View style={styles.container}>
+//     <View style={styles.container} testID="payment-screen">
 //       <WebView
 //         source={{ uri: checkoutUrl }}
 //         startInLoadingState
 //         renderLoading={() => (
 //           <ActivityIndicator
+//            testID="payment-loader"
 //             size="large"
 //             color="#FF0000"
 //             style={styles.loader}
@@ -209,87 +246,4 @@ const styles = StyleSheet.create({
 
 
 
-// import React, { useEffect, useState } from 'react';
-// import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-// import { WebView } from 'react-native-webview';
-// import Toast from 'react-native-toast-message';
 
-// const PaymentScreen = ({ route, navigation }:any) => {
-//   const { checkoutUrl } = route.params;
-//   const [hasHandled, setHasHandled] = useState(false);
-
-//   useEffect(() => {
-//     if (!checkoutUrl) {
-//       Toast.show({
-//         type: 'error',
-//         text1: 'Checkout Error',
-//         text2: 'No checkout URL provided.',
-//       });
-//       navigation.goBack();
-//     }
-//   }, [checkoutUrl]);
-
-//   const handleNavigationChange = (navState:any) => {
-//     const { url } = navState;
-
-//     if (hasHandled) return;
-
-//     console.log("Current URL:", url);
-
-//     if (url.includes("session_id=")) {
-//       const sessionId = url.split("session_id=")[1].split("&")[0]; 
-//       console.log('Session ID:', sessionId);
-//     }
-
-//     if (url.includes("success")) {
-//       setHasHandled(true);
-//        Toast.show({
-//         type: 'success',
-//         text1: 'Payment Successful',
-//         text2: 'Thank you! Redirecting...',
-//       });
-//       navigation.navigate("Main");
-//     }
-//      else if (url.includes('failure')) {
-//      setHasHandled(true);
-//      Toast.show({
-//         type: 'error',
-//         text1: 'Payment Failed',
-//         text2: 'Your payment could not be completed.',
-//       });
-//      navigation.goBack();
-//   } 
-//     else {
-//     console.log("Payment URL not recognized:", url);
-//   } 
-// }
-//   return (
-//     <View style={styles.container}>
-//       <WebView
-//         source={{ uri: checkoutUrl }}
-//         startInLoadingState
-//         renderLoading={() => (
-//           <ActivityIndicator
-//             size="large"
-//             color="#FF0000"
-//             style={styles.loader}
-//           />
-//         )}
-//         onNavigationStateChange={handleNavigationChange}
-//       />
-//     </View>
-//   );
-// };
-
-// export default PaymentScreen;
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//   },
-//   loader: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-// });

@@ -62,39 +62,39 @@ const ProfileScreen=()=>{
 };
 
   return(
-    <View style={styles.container}>
+    <View style={styles.container} testID="profile-screen">
       
       <ScrollView contentContainerStyle={styles.scrollContainer}>
 
         <View style={styles.avatarContainer}>
           {user.avatar && user.avatar !== 'null' && user.avatar !== '' ?(
-          <Image source={{ uri: user.avatar }} style={styles.avatar} />
+          <Image source={{ uri: user.avatar }} style={styles.avatar}   testID="profile-avatar"/>
            ):(
-          <Image source={require('../assets/images/avatar1.jpg')} style={styles.avatar}/>
+          <Image source={require('../assets/images/avatar1.jpg')} style={styles.avatar} testID="profile-avatar-default"/>
         )}
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>YOUR NAME</Text>
-          <Text style={styles.input}>{user.username}</Text>
+          <Text style={styles.input}  testID="profile-username">{user.username}</Text>
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>YOUR EMAIL</Text>
-          <Text style={styles.input}>{user.email}</Text>
+          <Text style={styles.input} testID="profile-email">{user.email}</Text>
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>YOUR ROLE</Text>
-          <Text style={styles.input}>{user.role}</Text>
+          <Text style={styles.input} testID="profile-role">{user.role}</Text>
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>YOUR PLAN</Text>
-          <Text style={styles.input}>{displayPlan()}</Text>
+          <Text style={styles.input} testID="profile-plan">{displayPlan()}</Text>
         </View>
 
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} testID="logout-button">
           <Icon name="logout" size={20} color="#fff" style={styles.logoutIcon} />
           <Text style={styles.logoutText}>LOGOUT</Text>
         </TouchableOpacity>

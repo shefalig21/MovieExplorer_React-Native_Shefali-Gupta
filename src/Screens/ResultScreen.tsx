@@ -13,79 +13,111 @@ const ResultScreen = () => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const fetchMovies = async () => {
-    setLoading(true);
+  const fetchMovies = async (pageNum = 1) => {
+    if (pageNum === 1) {
+      setLoading(true);
+    } else {
+      setIsLoadingMore(true);
+    }
+    
     setError(null);
-
     try {
       let data;
       if (searchText) {
-        data = await fetchMoviesBySearch(searchText);
+        data = await fetchMoviesBySearch(searchText, pageNum);
       } else if (genre) {
-        data = await fetchMoviesByGenre(genre);
+        data = await fetchMoviesByGenre(genre, pageNum);
       } else if (year) {
-        data = await fetchMoviesByReleaseYear(year); 
+        data = await fetchMoviesByReleaseYear(year, pageNum);
       } else if (rating) {
-        data = await fetchMoviesByRating(rating); 
+        data = await fetchMoviesByRating(rating, pageNum);
       }
-
-      setMovies(data.movies || []);
+      
+      setTotalPages(data.total_pages || 1);
+      
+      if (pageNum === 1) {
+        setMovies(data.movies || []);
+      } else {
+        setMovies(prevMovies => [...prevMovies, ...(data.movies || [])]);
+      }
     } catch (err) {
       console.error('Error fetching movies:', err);
       setError('Failed to fetch movies');
     } finally {
       setLoading(false);
+      setIsLoadingMore(false);
+    }
+  };
+
+  const loadMoreMovies = () => {
+    if (page < totalPages && !isLoadingMore) {
+      setPage(prevPage => prevPage + 1);
+      fetchMovies(page + 1);
     }
   };
 
   useEffect(() => {
-    fetchMovies();
+    setPage(1);
+    fetchMovies(1);
   }, [searchText, genre, year, rating]);
 
   const renderMovie = ({ item }:any) => (
-    <TouchableOpacity onPress={() => navigation.navigate('MovieDetails', { movie: item })}>
-      <View style={styles.movieItem}>
-        <MovieCard movie={item} />
-      </View>
-    </TouchableOpacity>
+    <View style={styles.movieItemContainer} testID={`movie-item-${item.id}`}>
+      <TouchableOpacity onPress={() => navigation.navigate('MovieDetails', { movie: item })}>
+        <View style={styles.movieItem}>
+          <MovieCard movie={item} />
+        </View>
+      </TouchableOpacity>
+    </View>
   );
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={26} color="#fff" />
+        <TouchableOpacity onPress={() => navigation.goBack()}  testID="back-button">
+          <Icon name="arrow-back" size={26} color="#fff" testID="back-icon"/>
         </TouchableOpacity>
         <Text style={styles.headerText}>
           {searchText
-            ? `Search Results for  "${searchText}"`
+            ? `Search Results for "${searchText}"`
             : genre
-            ? `Search Results for  "${genre}"`
+            ? `Search Results for "${genre}"`
             : year
-            ? `Movies Released in  "${year}"`
+            ? `Movies Released in "${year}"`
             : rating
-            ? `Movies with Rating  "${rating}+"`
+            ? `Movies with Rating "${rating}+"`
             : 'Movies'}
         </Text>
       </View>
-
       {loading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator color="#FF0000" size="large" />
+          <ActivityIndicator color="#FF0000" size="large" testID="loading-indicator" />
         </View>
       ) : error ? (
-        <Text style={styles.noResults}>{error}</Text>
+        <Text style={styles.noResults} testID="error-text">{error}</Text>
       ) : movies.length === 0 ? (
         <Text style={styles.noResults}>No movie found</Text>
       ) : (
         <FlatList
+         testID="movies-flatlist"
           data={movies}
           renderItem={renderMovie}
           keyExtractor={(item) => item.id.toString()}
           numColumns={2}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.list}
+          columnWrapperStyle={styles.columnWrapper}
+          onEndReached={loadMoreMovies}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            isLoadingMore ? (
+              <ActivityIndicator color="#FF0000" size="large" style={{ marginVertical: 20 }} testID="loading-more-indicator"/>
+            ) : null
+          }
         />
       )}
     </View>
@@ -122,12 +154,19 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingBottom: 20,
-    paddingHorizontal: 4,
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+    marginBottom: 35,
+  },
+  movieItemContainer: {
+    width: '48%', 
   },
   movieItem: {
-    flex: 1,
-    marginBottom: 20,
-    marginHorizontal: 8,
+    width: '100%',
+    aspectRatio: 2/3, 
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   noResults: {
     color: '#fff',
@@ -136,23 +175,4 @@ const styles = StyleSheet.create({
     marginTop: 100,
   },
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

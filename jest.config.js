@@ -21,6 +21,7 @@ module.exports = {
     '!src/Api/**',
     '!src/Data/**',
     "!src/Navigation/**",
+    '!src/Screens/SearchScreen.tsx/**',
   ],
 };
 

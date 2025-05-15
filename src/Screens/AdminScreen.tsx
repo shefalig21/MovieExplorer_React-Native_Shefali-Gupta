@@ -7,7 +7,7 @@ import EditMovieModal from '../Components/EditMovieModal';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { MovieAPIResponse,Movie } from '../types/AdminTYpe';
+import { MovieAPIResponse,Movie } from '../types/AdminType';
 
 const AdminScreen = () => {
   const navigation = useNavigation<any>();
@@ -124,10 +124,10 @@ const AdminScreen = () => {
         <Text style={styles.year}>{item.release_year}</Text>
       </View>
       <View style={styles.icons}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => handleEditMovie(item)}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => handleEditMovie(item)} testID={`edit-button-${item.id}`}>
           <Icon name="edit" size={22} color="#FF0000" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton} onPress={()=>handleDelete(item.id)}>
+        <TouchableOpacity style={styles.iconButton} onPress={()=>handleDelete(item.id)} testID={`delete-button-${item.id}`}>
           <Icon name="delete" size={22} color="#FF0000" />
         </TouchableOpacity>
       </View>
@@ -138,18 +138,18 @@ const AdminScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Image source={require('../assets/images/logo5.png')} style={styles.logo} />
-        <TouchableOpacity onPress={openModal}>
+        <TouchableOpacity onPress={openModal} testID="add-movie-button">
           <Icon name="add-circle" size={28} color="#FF0000" style={styles.Icon}/>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={handleLogout}>
+        <TouchableOpacity onPress={handleLogout} testID="logout-button">
       <Icon name="person" size={26} color="#FF0000" />
     </TouchableOpacity>
 
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#FF0000" style={{ marginTop: 20 }} />
+        <ActivityIndicator size="large" color="#FF0000" style={{ marginTop: 20 }} testID="loading-more-indicator"/>
       ) : (
         <FlatList
           data={movies}
@@ -162,15 +162,17 @@ const AdminScreen = () => {
           ListFooterComponent={
             loadingMore && <ActivityIndicator size="small" color="#FF0000" />
           }
+          testID="movies-flatlist"
         />
       )}
 
-      <AddMovieModal visible={isModalVisible} onClose={closeModal} />
+      <AddMovieModal visible={isModalVisible} onClose={closeModal} testID="add-movie-modal" />
 
       <EditMovieModal
         visible={editModalVisible}
         movie={selectedMovie}
         onClose={handleModalClose}
+        testID="edit-movie-modal"
       />
     </SafeAreaView>
   );

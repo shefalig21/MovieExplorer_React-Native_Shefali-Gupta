@@ -73,19 +73,19 @@ const HomeScreen=()=>{
 
         <MoviesList
           title="Trending"
-          filter={(movie)=>movie.rating>5.0}
+          filter={(movie)=>movie.rating>8.5}
           onMoviePress={handleMoviePress}
         />
 
         <MoviesList
           title="Popular"
-          filter={(movie)=>movie.release_year>2000}
+          filter={(movie)=>movie.release_year>2015}
           onMoviePress={handleMoviePress}
         />
 
         <MoviesList
           title="Top Rated"
-          filter={(movie)=>movie.rating>7.0 && movie.release_year>2000}
+          filter={(movie)=>movie.rating>7.0 && movie.release_year>2018}
           onMoviePress={handleMoviePress}
         />
       </ScrollView>

@@ -97,6 +97,3 @@ it('toggles password visibility if eye icon is pressed', () => {
   });
 
 });
-
-
-

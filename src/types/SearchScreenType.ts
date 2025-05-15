@@ -4,25 +4,21 @@ export interface Genre {
   label: string;
 }
 
-export interface RootStackParamList {
-  [key: string]: object | undefined; 
+export type DropdownType = 'year' | 'rating' | null;
 
+export type RootStackParamList = {
+  SearchScreen: undefined;
   ResultScreen: {
     searchText?: string;
     genre?: string;
     year?: string | number;
     rating?: string;
-     id: number;
+    id?: number; 
   };
-
-  SearchScreen: undefined;
-
   MovieDetails: {
-    movie: any; 
+    movie: any;
   };
-}
-
-export type DropdownType = 'year' | 'rating' | null;
+};
 
 export type SearchScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'SearchScreen'>;
 

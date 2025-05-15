@@ -20,7 +20,8 @@ const BottomTabNavigation = () => {
           backgroundColor: '#0C0F14',
           paddingBottom: 5,
           paddingTop: 5,
-          height: 60,
+          position:'absolute',
+          height: 75,
           borderTopWidth: 0,
         },
         tabBarIcon: ({ focused, color }) => {

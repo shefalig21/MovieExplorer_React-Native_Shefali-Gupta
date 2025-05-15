@@ -14,4 +14,5 @@ export interface MovieFormData {
 export interface AddMovieModalProps {
   visible: boolean;
   onClose: () => void;
+  testID?: string;
 }

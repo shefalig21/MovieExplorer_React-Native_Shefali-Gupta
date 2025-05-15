@@ -38,40 +38,40 @@ const Watchlist=()=>{
   };
 
   const renderItem=({ item })=>(
-    <View style={styles.movieContainer}>
+    <View style={styles.movieContainer} testID={`movie-item-${item.id}`}>
 
-      <Image source={{ uri: item.poster_url }} style={styles.poster}/>
+      <Image source={{ uri: item.poster_url }} style={styles.poster} testID={`movie-poster-${item.id}`} />
       <View style={styles.detailsContainer}>
         <View style={styles.titleRow}>
-          <Text style={styles.movieTitle}>{item.title}</Text>
+          <Text style={styles.movieTitle} testID={`movie-title-${item.id}`}>{item.title}</Text>
 
-          <TouchableOpacity onPress={()=>removeFromWatchlist(item.id)}>
+          <TouchableOpacity onPress={()=>removeFromWatchlist(item.id)} testID={`remove-favorite-${item.id}`}>
             <Icon name="favorite" size={20} color="#FF0000" />
           </TouchableOpacity>
         </View>
-        <Text style={styles.year}>{item.release_year}</Text>
-        <Text style={styles.genre}>{item.genre}</Text>
+        <Text style={styles.year} testID={`movie-year-${item.id}`}>{item.release_year}</Text>
+        <Text style={styles.genre}  testID={`movie-genre-${item.id}`}>{item.genre}</Text>
         <View style={styles.ratingRow}>
           <Icon name="star" size={16} color="#FFD700" />
-          <Text style={styles.ratingText}>{item.rating}</Text>
+          <Text style={styles.ratingText} testID={`movie-rating-${item.id}`}>{item.rating}</Text>
         </View>
       </View>
     </View>
   );
 
   return(
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} testID="watchlist-scrollview">
       <View style={styles.header}>
-        <TouchableOpacity onPress={()=>navigation.goBack()}>
+        <TouchableOpacity onPress={()=>navigation.goBack()} testID="back-button">
           <Icon name="arrow-back" size={28} color="white"/>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Wishlist</Text>
+        <Text style={styles.headerTitle} testID="header-title">Watchlist</Text>
       </View>
 
       {loading?(
-        <ActivityIndicator size="large" color="#E50914" style={{ marginTop: 50 }}/>
+        <ActivityIndicator size="large" color="#E50914" style={{ marginTop: 50 }}  testID="loading-indicator"/>
       ):watchlist.length=== 0 ?(
-        <Text style={styles.emptyText}>No movies in your watchlist</Text>
+        <Text style={styles.emptyText}  testID="empty-text">No movies in your watchlist</Text>
       ):(
         <FlatList
           data={watchlist}
@@ -79,6 +79,7 @@ const Watchlist=()=>{
           renderItem={renderItem}
           scrollEnabled={false}
           contentContainerStyle={{ paddingBottom: 20 }}
+          testID="watchlist-flatlist"
         />
       )}
     </ScrollView>

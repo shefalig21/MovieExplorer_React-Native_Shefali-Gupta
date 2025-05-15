@@ -77,6 +77,19 @@ describe('AddMovieModal Component', () => {
     });
   });
 
+   it('allows selecting poster image and updates state', async () => {
+    const { getByTestId } = setup();
+
+    (launchImageLibrary as jest.Mock).mockImplementationOnce((_, callback) => {
+      callback({ assets: [{ uri: 'poster-image.jpg' }] });
+    });
+    fireEvent.press(getByTestId('poster-button'));
+
+    await waitFor(() => {
+      expect(launchImageLibrary).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('handles image picker cancel', async () => {
     const { getByTestId } = setup();
     (launchImageLibrary as jest.Mock).mockImplementationOnce((_, callback) => {

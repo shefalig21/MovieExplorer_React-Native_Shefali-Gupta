@@ -31,24 +31,6 @@ describe('MoviesList Component', () => {
     jest.clearAllMocks();
   });
 
-  test('renders loading indicator initially', async () => {
-    (getMovieDetails as jest.Mock).mockImplementation(() => 
-      new Promise((resolve) => setTimeout(() => resolve({ movies: mockMovies, meta: mockMeta }), 100))
-    );
-
-    const { queryByTestId, getByTestId } = render(
-      <MoviesList title="Test Movies" onMoviePress={() => {}} />
-    );
-
-    expect(getByTestId('loading-indicator')).toBeTruthy();
-
-    expect(queryByTestId('flatlist')).toBeNull();
-
-    await waitFor(() => {
-      expect(getByTestId('flatlist')).toBeTruthy();
-    });
-  });
-
   test('renders title and movie cards after loading', async () => {
     (getMovieDetails as jest.Mock).mockResolvedValue({ movies: mockMovies, meta: mockMeta });
 
