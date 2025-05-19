@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Modal, Text, TextInput, TouchableOpacity, ScrollView, Image, StyleSheet } from "react-native";
+import { View, Modal, Text, TextInput, TouchableOpacity, ScrollView, Image, StyleSheet, ActivityIndicator} from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { launchImageLibrary } from "react-native-image-picker";
 import { Picker } from "@react-native-picker/picker";
@@ -18,6 +18,7 @@ const EditMovieModal = ({ visible, onClose, movie }: EditMovieModalProps) => {
   const [poster, setPoster] = useState<ImageAsset | null>(null);
   const [banner, setBanner] = useState<ImageAsset | null>(null);
   const [isPremium, setIsPremium] = useState<"true" | "false">("false");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (movie) {
@@ -46,67 +47,72 @@ const EditMovieModal = ({ visible, onClose, movie }: EditMovieModalProps) => {
     }
   };
 
-  const handleSubmit = async () => {
-    if (!title.trim() || !genre.trim() || !releaseYear.trim() || !poster) {
-       Toast.show({
+const handleSubmit = async () => {
+  if (!title.trim() || !genre.trim() || !releaseYear.trim() || !poster) {
+    Toast.show({
       type: 'error',
       text1: 'Validation Error',
       text2: 'Please fill in all required fields (Title, Genre, Release Year, Poster).',
     });
-      return;
+    return;
+  }
+
+  const updatedMovie = {
+    id: movie.id,
+    title,
+    description,
+    genre,
+    release_year: releaseYear,
+    rating,
+    director,
+    duration,
+    is_premium: isPremium === "true",
+  };
+
+  setLoading(true); 
+
+  try {
+    const formData = new FormData();
+    for (const key in updatedMovie) {
+      const value = updatedMovie[key as keyof typeof updatedMovie];
+      if (value !== null && value !== undefined) {
+        formData.append(key, value);
+      }
     }
 
-    const updatedMovie = {
-      id: movie.id, 
-      title,
-      description,
-      genre,
-      release_year: releaseYear,
-      rating,
-      director,
-      duration,
-      is_premium: isPremium === "true",
-    };
+    if (poster?.uri) {
+      formData.append("poster", {
+        uri: poster.uri,
+        name: poster.name || "poster.jpg",
+        type: poster.type || "image/jpeg",
+      } as any);
+    }
 
-    try {
-      const formData = new FormData();
-      for (const key in updatedMovie) {
-        const value = updatedMovie[key as keyof typeof updatedMovie];
-        if (value !== null && value !== undefined) {
-          formData.append(key, value);
-        }
-      }
-if (poster?.uri) {
-        formData.append("poster", {
-          uri: poster.uri,
-          name: poster.name || "poster.jpg",
-          type: poster.type || "image/jpeg",
-        } as any);
-      }
+    if (banner?.uri) {
+      formData.append("banner", {
+        uri: banner.uri,
+        name: banner.name || "banner.jpg",
+        type: banner.type || "image/jpeg",
+      } as any);
+    }
 
-      if (banner?.uri) {
-        formData.append("banner", {
-          uri: banner.uri,
-          name: banner.name || "banner.jpg",
-          type: banner.type || "image/jpeg",
-        } as any);
-      }
-
-      await updateMovie(movie.id,formData);
-       Toast.show({
+    await updateMovie(movie.id, formData);
+    Toast.show({
       type: 'success',
       text1: 'Success',
       text2: 'Movie updated successfully.',
     });
-      onClose();  
-    } catch (error) {
-     Toast.show({
+    onClose();
+  } catch (error) {
+    Toast.show({
       type: 'error',
       text1: 'Update Failed',
       text2: 'Failed to update the movie. Please try again.',
     });
-    }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Modal visible={visible} animationType="slide">
@@ -182,9 +188,19 @@ if (poster?.uri) {
             {banner && <Image source={{ uri: banner.uri }} style={styles.imagePreview} />}
           </View>
 
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}  testID="submit-button">
-            <Text style={styles.submitText}>Save Movie</Text>
-          </TouchableOpacity>
+          <TouchableOpacity
+           style={styles.submitButton}
+           onPress={handleSubmit}
+           disabled={loading}
+           testID="submit-button"
+>
+           {loading ? (
+          <ActivityIndicator size="small" color="#fff" />
+           ) : (
+           <Text style={styles.submitText}>Save Movie</Text>
+           )}
+           </TouchableOpacity>
+           
         </ScrollView>
       </View>
     </Modal>

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import {View,Text,Modal,TextInput,TouchableOpacity,StyleSheet,ScrollView,Alert } from 'react-native';
+import {View,Text,Modal,TextInput,TouchableOpacity,StyleSheet,ScrollView,Alert,ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { addMovie } from '../Api/AdminAPI';
 import { AddMovieModalProps,MovieFormData } from '../types/MovieFormTYpes';
 import Toast from 'react-native-toast-message';
-
 
 const AddMovieModal = ({ visible,onClose,testID }:AddMovieModalProps) => {
   const [form, setForm] = useState<MovieFormData>({
@@ -13,6 +12,7 @@ const AddMovieModal = ({ visible,onClose,testID }:AddMovieModalProps) => {
 
   const [posterUri, setPosterUri] = useState<string | null>(null);
   const [bannerUri, setBannerUri] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false); 
 
   const handleImagePicker = (type: 'poster' | 'banner') => {
     launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, (response) => {
@@ -33,56 +33,72 @@ const AddMovieModal = ({ visible,onClose,testID }:AddMovieModalProps) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-const handleSubmit = async () => {
-  const { title, genre, release_year } = form;
-  if (!title || !genre || !release_year || !posterUri) {
-    Toast.show({
-      type: 'error',
-      text1: 'Validation Error',
-      text2: 'Please fill all required fields.',
-    });
-    return;
-  }
-
-  try {
-    const formData = new FormData();
-
-     Object.entries(form).forEach(([key, value]) => {
-        formData.append(key, value);
+  const handleSubmit = async () => {
+    const { title, genre, release_year } = form;
+    if (!title || !genre || !release_year || !posterUri) {
+      Toast.show({
+        type: 'error',
+        text1: 'Validation Error',
+        text2: 'Please fill all required fields.',
       });
-
-    formData.append('poster', {
-      uri: posterUri,
-      name: 'poster.jpg',
-      type: 'image/jpeg',
-    });
-
-    if (bannerUri) {
-      formData.append('banner', {
-        uri: bannerUri,
-        name: 'banner.jpg',
-        type: 'image/jpeg',
-      });
+      return;
     }
 
-    await addMovie(formData); 
+    setLoading(true);  
 
-    Toast.show({
-      type: 'success',
-      text1: 'Movie added successfully',
+    setTimeout(async () => {
+      try {
+        const formData = new FormData();
+
+        Object.entries(form).forEach(([key, value]) => {
+          formData.append(key, value);
+        });
+
+        formData.append('poster', {
+          uri: posterUri,
+          name: 'poster.jpg',
+          type: 'image/jpeg',
+        });
+
+        if (bannerUri) {
+          formData.append('banner', {
+            uri: bannerUri,
+            name: 'banner.jpg',
+            type: 'image/jpeg',
+          });
+        }
+
+        await addMovie(formData);
+
+        Toast.show({
+          type: 'success',
+          text1: 'Movie added successfully',
+        });
+
+        setForm({
+          title: '',
+          genre: '',
+          release_year: '',
+          rating: '',
+          director: '',
+          duration: '',
+          streaming_platform: '',
+          main_lead: '',
+          description: '',
+          premium: false,
+        });
+        setPosterUri(null);
+        setBannerUri(null);
+
+        onClose();
+      } catch (error: any) {
+        console.error('Error adding movie:', error.message);
+        Alert.alert('Error', 'Failed to add movie. Please try again.');
+      } finally {
+        setLoading(false); 
+      }
     });
-
-    setForm({ title: '',genre: '',release_year: '',rating: '',director: '',duration: '',streaming_platform: '',main_lead: '',description: '',premium: false,
-    });
-    setPosterUri(null);
-    setBannerUri(null);
-
-    onClose();
-  } catch (error:any) {
-    console.error('Error adding movie:', error.message);
-    Alert.alert('Error', 'Failed to add movie. Please try again.');
-  }
-};
+  };
 
   return (
     <Modal visible={visible} animationType="slide"  testID={testID}>
@@ -153,8 +169,13 @@ const handleSubmit = async () => {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} testID="submit-button">
-            <Text style={styles.submitText}>Add Movie</Text>
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} testID="submit-button" disabled={loading}>
+             {loading ? (
+          <ActivityIndicator size="small" color="#fff" />
+          ) : (
+          <Text style={styles.submitText}>Add Movie</Text>
+          )}
+
           </TouchableOpacity>
         </ScrollView>
       </View>
