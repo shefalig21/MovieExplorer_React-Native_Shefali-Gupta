@@ -239,6 +239,9 @@ const styles=StyleSheet.create({
 
 
 
+
+
+
 // import React, { useState, useEffect } from 'react';
 // import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Alert } from 'react-native';
 // import { useNavigation, useRoute } from '@react-navigation/native';

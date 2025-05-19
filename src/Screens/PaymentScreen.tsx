@@ -36,16 +36,17 @@ const PaymentScreen = ({ route, navigation }: Props) => {
         setHasHandled(true);
         setShowWebView(false);
         try {
-          await confirmSubscriptionSuccess(sessionId);
+          const res = await confirmSubscriptionSuccess(sessionId);
           Toast.show({
             type: 'success',
             text1: 'Payment Successful',
             text2: 'Thank you! Redirecting...',
           });
 
-          setTimeout(() => {
+          if(res.status === 200){
             navigation.navigate('Main');
-          }, 1000);
+          } 
+
         } catch (error) {
           Toast.show({
             type: 'error',

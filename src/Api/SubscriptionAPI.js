@@ -47,7 +47,7 @@ export const confirmSubscriptionSuccess = async (session_id) => {
       }
     );
 
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error confirming subscription success:', error.response?.data || error.message);
     throw error;

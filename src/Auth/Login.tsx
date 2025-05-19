@@ -17,7 +17,6 @@ const Login=()=>{
 
   const emailValid=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordValid = /^[A-Za-z0-9]{6,}$/;
-  // const passwordValid=/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
 
   const handleLogin=async()=>{
     try{
@@ -41,7 +40,6 @@ const Login=()=>{
           const role=await AsyncStorage.setItem('userRole', result.user.role || '');
 
           console.log('Loaded from AsyncStorage:', { username, email, avatar, role });
-          // console.log('Avatar Image URL:', avatar); 
 
           Toast.show({
             type: 'success',
@@ -66,7 +64,6 @@ const Login=()=>{
       }
     }
     catch(error: any) {
-      // console.log("Login error:", error);
       Toast.show({
         type: 'error',
         text1: 'Something went wrong',

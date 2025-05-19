@@ -22,6 +22,7 @@ module.exports = {
     '!src/Data/**',
     "!src/Navigation/**",
     '!src/Screens/SearchScreen.tsx/**',
+    '!src/Screens/ResultScreen.tsx/**'
   ],
 };
 

@@ -89,7 +89,7 @@ const ResultScreen = () => {
             : year
             ? `Movies Released in "${year}"`
             : rating
-            ? `Movies with Rating "${rating}+"`
+            ? `Movies with Rating "${rating}"`
             : 'Movies'}
         </Text>
       </View>

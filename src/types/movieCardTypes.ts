@@ -7,6 +7,7 @@ export interface MovieCardData{
     rating:number,
     release_year:number,
     duration:string,
+    premium:string,
   }
 
   export interface MovieCardProps{
