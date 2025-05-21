@@ -19,7 +19,9 @@ const Signup=()=>{
 
   const nameValid=/^[A-Za-z\s]{2,}$/;
   const emailValid=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const passwordValid=/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+  // const passwordValid=/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+   const passwordValid = /^(?=.*[@#$])[A-Za-z0-9@#$]{6,}$/;
+
 
   const handleSignUp=async()=>{
     if (!name ||!email|| !password || !confirmPassword){
@@ -31,7 +33,7 @@ const Signup=()=>{
       setError('Enter a valid email');
     }
     else if (!passwordValid.test(password)){
-      setError('Password must be at least 6 characters and include both letters and numbers');
+      setError('Password must be at least 6 characters long and include at least one special character');
     }
     else if (password !== confirmPassword){
       setError('Passwords do not match');
@@ -258,6 +260,16 @@ const styles=StyleSheet.create({
     fontSize: 14,
   },
 });
+
+
+
+
+
+
+
+
+
+
 
 
 
