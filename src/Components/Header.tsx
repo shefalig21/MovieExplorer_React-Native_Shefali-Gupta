@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { HeaderProps } from '../types/NavigationTypes';
 
-const Header=({navigation}:any)=>{
+const Header=({navigation}: HeaderProps)=>{
   return(
     <View style={styles.container}>
    

@@ -6,10 +6,13 @@ import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message'; 
 import { getUserSubscriptionStatus, getUserSubscriptions } from '../Api/SubscriptionAPI';
 import { getUserDetails } from '../Api/UserAPI';
+import { User } from '../types/ProfileTypes';
+import { RootNavigationProp } from '../types/NavigationTypes';
 
 const ProfileScreen = () => {
-  const navigation = useNavigation<any>();
-  const [user, setUser] = useState({ username: '', email: '', role: '', avatar: '', plan: '' });
+  const navigation = useNavigation<RootNavigationProp>();
+
+  const [user, setUser] = useState<User>({ username: '', email: '', role: '', avatar: '', plan: '' });
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [hasPlan, setHasPlan] = useState(false);
@@ -177,8 +180,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
-    borderBottomWidth: 1,
-    borderBottomColor: '#FF0000',
+    // borderBottomWidth: 1,
+    // borderBottomColor: '#FF0000',
     paddingBottom: 15,
   },
   logoutBtn: {

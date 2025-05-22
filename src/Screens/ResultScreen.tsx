@@ -45,7 +45,6 @@ const ResultScreen = () => {
       if (pageNum === 1) {
         setMovies(data.movies || []);
       } else {
-        // Filter out duplicates before adding
         const newMovies = data.movies || [];
         const existingIds = new Set(movies.map(movie => movie.id));
         const filteredNewMovies = newMovies.filter(movie => !existingIds.has(movie.id));

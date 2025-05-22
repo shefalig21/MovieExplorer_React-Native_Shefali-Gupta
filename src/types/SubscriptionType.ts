@@ -6,11 +6,16 @@ export interface PlanType{
   features: string[];
 }
 
-export interface SubscriptionStatusType{
-  status: string | null;
-}
+// export interface SubscriptionStatusType{
+//   status: string | null;
+// }
+export type SubscriptionStatusType = '1-day' | '1-month' | '3-months' | 'free' | 'No Plan' | null;
 
 
 export interface CreateSubscriptionResultType{
   checkout_url?: string;
 }
+
+
+
+

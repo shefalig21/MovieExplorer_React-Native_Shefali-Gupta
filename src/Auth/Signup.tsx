@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation,NavigationProp } from '@react-navigation/native';
 import { SignUpResponse } from '../types/authTypes';
 import { registerUser } from '../Api/AuthAPI';
 import Toast from 'react-native-toast-message'; 
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { RootStackParamList } from '../types/NavigationTypes';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 const Signup=()=>{
 
-  const navigation=useNavigation<any>();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [name,setName]=useState<string>('');
   const [email,setEmail]=useState<string>('');
   const [password,setPassword]=useState<string>('');
@@ -49,7 +51,7 @@ const Signup=()=>{
         navigation.replace('Login');
 
       }
-      catch (error: any){
+      catch (error:any){
          Toast.show({
           type: 'error', 
           text1: `Sign up failed: ${error.message || 'Something went wrong'}`,

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { CustomAlertProps } from '../types/ProfileTypes';
 
-const CustomAlert = ({ visible, onClose }:any) => {
+const CustomAlert = ({ visible, onClose }:CustomAlertProps) => {
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>

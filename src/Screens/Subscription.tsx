@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { View,Text,TouchableOpacity,ScrollView,StyleSheet,ActivityIndicator,Pressable,Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { createSubscription, getUserSubscriptionStatus } from '../Api/SubscriptionAPI';
 import Toast from 'react-native-toast-message';
 import { subscriptionPlans } from '../Data/subscriptionPlans';
-import { SubscriptionStatusType, PlanType } from '../types/SubscriptionType';
+import { SubscriptionStatusType } from '../types/SubscriptionType';
+import { SubscriptionScreenNavigationProp } from '../types/NavigationTypes';
 
 const Subscription = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<SubscriptionScreenNavigationProp>();
   const [selectedPlan, setSelectedPlan] = useState<string>('basic');
-  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatusType | 'No Plan' | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatusType>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,7 +29,7 @@ const Subscription = () => {
         }
       } catch (error) {
         console.error('Failed to fetch subscription status:', error);
-        setSubscriptionStatus('No Plan'); 
+        setSubscriptionStatus('No Plan');
         Toast.show({
           type: 'error',
           text1: 'Error',
@@ -95,21 +96,25 @@ const Subscription = () => {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {subscriptionPlans.map((item) => {
-          const isCurrentPlan = 
+          const isCurrentPlan =
             (subscriptionStatus === '1-day' && item.id === 'basic') ||
             (subscriptionStatus === '1-month' && item.id === 'standard') ||
             (subscriptionStatus === '3-months' && item.id === 'premium');
 
+          const disabled = isSubscribed;
+
           return (
-            <TouchableOpacity
+            <Pressable
               key={item.id}
               testID={`plan-${item.id}`}
-              onPress={isSubscribed ? undefined : () => setSelectedPlan(item.id)}
-              style={[
+              onPress={() => !disabled && setSelectedPlan(item.id)}
+              style={({ pressed }) => [
                 styles.card,
-                (isSubscribed ? isCurrentPlan : selectedPlan === item.id) && styles.cardSelected
+                (isSubscribed ? isCurrentPlan : selectedPlan === item.id) && styles.cardSelected,
+                pressed && !disabled && styles.cardPressed,
               ]}
-              disabled={isSubscribed}
+              android_ripple={{ color: '#FF000033' }}
+              disabled={disabled}
             >
               {item.id === 'standard' && !isSubscribed && (
                 <View style={styles.popularBadge}>
@@ -123,7 +128,9 @@ const Subscription = () => {
               <Text style={styles.duration}>{item.duration}</Text>
               <View style={styles.features}>
                 {item.features.map((text, index) => (
-                  <Text key={index} style={styles.featureText}>✔ {text}</Text>
+                  <Text key={index} style={styles.featureText}>
+                    ✔ {text}
+                  </Text>
                 ))}
               </View>
               {isCurrentPlan && isSubscribed && (
@@ -131,7 +138,7 @@ const Subscription = () => {
                   <Text style={styles.currentPlanText}>Current Plan</Text>
                 </View>
               )}
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </ScrollView>
@@ -146,11 +153,7 @@ const Subscription = () => {
             <Text style={styles.payText}>Already Subscribed</Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity
-            style={styles.payButton}
-            onPress={handleCheckout}
-            testID="pay-now-button"
-          >
+          <TouchableOpacity style={styles.payButton} onPress={handleCheckout} testID="pay-now-button">
             <Text style={styles.payText}>Pay Now</Text>
           </TouchableOpacity>
         )}
@@ -164,7 +167,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0C0F14',
     padding: 16,
-    paddingBottom: 80, 
+    paddingBottom: 80,
   },
   loadingContainer: {
     justifyContent: 'center',
@@ -193,9 +196,26 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderWidth: 1,
     borderColor: '#333',
+    // Add shadow for iOS
+    ...Platform.select({
+      ios: {
+        shadowColor: '#FF0000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   cardSelected: {
     borderColor: '#FF0000',
+    borderWidth: 2,
+  },
+  cardPressed: {
+    transform: [{ scale: 0.97 }],
+    borderColor: '#FF5555',
     borderWidth: 2,
   },
   popularBadge: {
@@ -317,27 +337,14 @@ export default Subscription;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 // import React, { useState, useEffect } from 'react';
-// import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+// import { View,Text,TouchableOpacity,ScrollView,StyleSheet,ActivityIndicator,Pressable,Platform } from 'react-native';
 // import Icon from 'react-native-vector-icons/MaterialIcons';
 // import { useNavigation } from '@react-navigation/native';
 // import { createSubscription, getUserSubscriptionStatus } from '../Api/SubscriptionAPI';
 // import Toast from 'react-native-toast-message';
 // import { subscriptionPlans } from '../Data/subscriptionPlans';
-// import { SubscriptionStatusType, PlanType } from '../types/SubscriptionType';
+// import { SubscriptionStatusType } from '../types/SubscriptionType';
 
 // const Subscription = () => {
 //   const navigation = useNavigation();
@@ -354,14 +361,13 @@ export default Subscription;
 //           setSubscriptionStatus('No Plan');
 //         } else {
 //           setSubscriptionStatus(status);
-//           // Set the selected plan based on the current subscription
 //           if (status === '1-day') setSelectedPlan('basic');
 //           if (status === '1-month') setSelectedPlan('standard');
 //           if (status === '3-months') setSelectedPlan('premium');
 //         }
 //       } catch (error) {
 //         console.error('Failed to fetch subscription status:', error);
-//         setSubscriptionStatus('No Plan'); 
+//         setSubscriptionStatus('No Plan');
 //         Toast.show({
 //           type: 'error',
 //           text1: 'Error',
@@ -428,22 +434,25 @@ export default Subscription;
 
 //       <ScrollView contentContainerStyle={styles.scrollContent}>
 //         {subscriptionPlans.map((item) => {
-//           // Determine if this is the current plan
-//           const isCurrentPlan = 
+//           const isCurrentPlan =
 //             (subscriptionStatus === '1-day' && item.id === 'basic') ||
 //             (subscriptionStatus === '1-month' && item.id === 'standard') ||
 //             (subscriptionStatus === '3-months' && item.id === 'premium');
 
+//           const disabled = isSubscribed;
+
 //           return (
-//             <TouchableOpacity
+//             <Pressable
 //               key={item.id}
 //               testID={`plan-${item.id}`}
-//               onPress={isSubscribed ? undefined : () => setSelectedPlan(item.id)}
-//               style={[
+//               onPress={() => !disabled && setSelectedPlan(item.id)}
+//               style={({ pressed }) => [
 //                 styles.card,
-//                 (isSubscribed ? isCurrentPlan : selectedPlan === item.id) && styles.cardSelected
+//                 (isSubscribed ? isCurrentPlan : selectedPlan === item.id) && styles.cardSelected,
+//                 pressed && !disabled && styles.cardPressed,
 //               ]}
-//               disabled={isSubscribed}
+//               android_ripple={{ color: '#FF000033' }}
+//               disabled={disabled}
 //             >
 //               {item.id === 'standard' && !isSubscribed && (
 //                 <View style={styles.popularBadge}>
@@ -457,7 +466,9 @@ export default Subscription;
 //               <Text style={styles.duration}>{item.duration}</Text>
 //               <View style={styles.features}>
 //                 {item.features.map((text, index) => (
-//                   <Text key={index} style={styles.featureText}>✔ {text}</Text>
+//                   <Text key={index} style={styles.featureText}>
+//                     ✔ {text}
+//                   </Text>
 //                 ))}
 //               </View>
 //               {isCurrentPlan && isSubscribed && (
@@ -465,7 +476,7 @@ export default Subscription;
 //                   <Text style={styles.currentPlanText}>Current Plan</Text>
 //                 </View>
 //               )}
-//             </TouchableOpacity>
+//             </Pressable>
 //           );
 //         })}
 //       </ScrollView>
@@ -480,11 +491,7 @@ export default Subscription;
 //             <Text style={styles.payText}>Already Subscribed</Text>
 //           </TouchableOpacity>
 //         ) : (
-//           <TouchableOpacity
-//             style={styles.payButton}
-//             onPress={handleCheckout}
-//             testID="pay-now-button"
-//           >
+//           <TouchableOpacity style={styles.payButton} onPress={handleCheckout} testID="pay-now-button">
 //             <Text style={styles.payText}>Pay Now</Text>
 //           </TouchableOpacity>
 //         )}
@@ -498,7 +505,7 @@ export default Subscription;
 //     flex: 1,
 //     backgroundColor: '#0C0F14',
 //     padding: 16,
-//     paddingBottom: 80, 
+//     paddingBottom: 80,
 //   },
 //   loadingContainer: {
 //     justifyContent: 'center',
@@ -527,9 +534,26 @@ export default Subscription;
 //     marginBottom: 20,
 //     borderWidth: 1,
 //     borderColor: '#333',
+//     // Add shadow for iOS
+//     ...Platform.select({
+//       ios: {
+//         shadowColor: '#FF0000',
+//         shadowOffset: { width: 0, height: 2 },
+//         shadowOpacity: 0.3,
+//         shadowRadius: 4,
+//       },
+//       android: {
+//         elevation: 4,
+//       },
+//     }),
 //   },
 //   cardSelected: {
 //     borderColor: '#FF0000',
+//     borderWidth: 2,
+//   },
+//   cardPressed: {
+//     transform: [{ scale: 0.97 }],
+//     borderColor: '#FF5555',
 //     borderWidth: 2,
 //   },
 //   popularBadge: {
@@ -611,4 +635,5 @@ export default Subscription;
 // });
 
 // export default Subscription;
+
 

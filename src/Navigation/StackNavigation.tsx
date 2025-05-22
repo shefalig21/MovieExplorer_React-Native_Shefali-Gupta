@@ -9,7 +9,8 @@ import ResultScreen from '../Screens/ResultScreen';
 import AdminScreen from '../Screens/AdminScreen';
 import BottomTabNavigation from './BottomTabNavigation';
 import PaymentScreen from '../Screens/PaymentScreen';
-
+import Success from '../Screens/Success';
+import Failure from '../Screens/Failure';
 
 const Stack=createNativeStackNavigator();
 
@@ -25,6 +26,8 @@ const StackNavigation=()=>{
         <Stack.Screen name="ResultScreen" component={ResultScreen}/>
         <Stack.Screen name="Admin" component={AdminScreen}/>
         <Stack.Screen name="Payment" component={PaymentScreen}/>
+        <Stack.Screen name="Success" component={Success}/>
+        <Stack.Screen name="Failure" component={Failure}/>
       </Stack.Navigator>
     </NavigationContainer>
     

@@ -3,8 +3,9 @@ import { Modal,View,Text,StyleSheet,TouchableOpacity,TouchableWithoutFeedback } 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';
+import { ProfileModalProps } from '../types/ProfileTypes';
 
-const ProfileModal = ({ visible, onClose }) => {
+const ProfileModal = ({ visible, onClose }: ProfileModalProps) => {
   const navigation = useNavigation<any>();
   const [user, setUser] = useState({ username: '',email: '',role: '',});
 
