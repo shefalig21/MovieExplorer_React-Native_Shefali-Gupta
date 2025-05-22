@@ -75,3 +75,25 @@ export const getUserSubscriptionStatus = async () => {
     return 'Free'; 
   }
 };
+
+export const getUserSubscriptions = async () => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const response = await axios.get(`${baseURL}/user_subscriptions`, {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data; 
+  } catch (error) {
+    console.error('Error fetching user subscriptions:', error.response?.data || error.message);
+    throw error;
+  }
+};

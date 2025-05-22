@@ -267,21 +267,3 @@ const styles=StyleSheet.create({
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

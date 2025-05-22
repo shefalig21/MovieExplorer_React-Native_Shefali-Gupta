@@ -51,11 +51,3 @@ const styles=StyleSheet.create({
   },
 });
 
-
-
-
-
-
-
-
-

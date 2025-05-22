@@ -21,3 +21,26 @@ export const updateDeviceToken=async(device_token)=>{
         throw error;
     }
 }
+
+
+export const toggleNotifications = async (notificationsEnabled) => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+
+    const response = await axios.post(`${baseURL}/toggle_notifications`,
+      { notifications_enabled: notificationsEnabled },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
