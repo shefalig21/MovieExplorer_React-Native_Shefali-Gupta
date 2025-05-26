@@ -27,7 +27,7 @@ export const getUserDetails = async () => {
 
 export const updateProfilePicture = async (profilePicture) => {
   try {
-    const token = await AsyncStorage.getItem('authToken');
+    const token = await AsyncStorage.getItem('token');
     if (!token) {
       throw new Error('Token not found');
     }
@@ -46,6 +46,7 @@ export const updateProfilePicture = async (profilePicture) => {
         'Accept': 'application/json',
       },
     });
+    // console.log('Server response:', response.data);
 
     return response.data.user; 
   } catch (error) {

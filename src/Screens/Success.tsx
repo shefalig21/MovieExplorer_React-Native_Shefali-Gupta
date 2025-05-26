@@ -20,14 +20,15 @@ const Success = () => {
           source={require('../assets/images/tick.png')}
           style={styles.tickImage}
           resizeMode="contain"
+          testID="successImage"
         />
       </View>
 
-      <Text style={styles.successText}>Payment Successful!</Text>
-      <Text style={styles.subText}>Your transaction has been completed</Text>
+      <Text style={styles.successText} testID="successTitle">Payment Successful!</Text>
+      <Text style={styles.subText} testID="successSubText">Your transaction has been completed</Text>
 
-      <TouchableOpacity style={styles.button} onPress={handleNavigation}>
-        <Text style={styles.buttonText}>Back to Home</Text>
+      <TouchableOpacity style={styles.button} onPress={handleNavigation}  testID="successBackHomeButton">
+        <Text style={styles.buttonText} testID="successButtonText">Back to Home</Text>
       </TouchableOpacity>
     </View>
   );

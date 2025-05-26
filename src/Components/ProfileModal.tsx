@@ -51,18 +51,18 @@ const ProfileModal = ({ visible, onClose }: ProfileModalProps) => {
         <View style={styles.modalBackground}>
           <TouchableWithoutFeedback onPress={() => {}}>
             <View style={styles.modalContainer}>
-              <Text style={styles.header}>Welcome</Text>
+              <Text style={styles.header} testID="profileHeader">Welcome</Text>
 
               <Text style={styles.label}>Name</Text>
-              <Text style={styles.value}>{user.username}</Text>
+              <Text style={styles.value}  testID="profileName">{user.username}</Text>
 
               <Text style={styles.label}>Email</Text>
-              <Text style={styles.value}>{user.email}</Text>
+              <Text style={styles.value} testID="profileEmail">{user.email}</Text>
 
               <Text style={styles.label}>Role</Text>
-              <Text style={styles.value}>{user.role}</Text>
+              <Text style={styles.value} testID="profileRole">{user.role}</Text>
 
-              <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} testID="logoutButton">
                 <Text style={styles.logoutButtonText}>Logout</Text>
               </TouchableOpacity>
             </View>

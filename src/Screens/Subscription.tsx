@@ -94,7 +94,7 @@ const Subscription = () => {
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {subscriptionPlans.map((item) => {
           const isCurrentPlan =
             (subscriptionStatus === '1-day' && item.id === 'basic') ||

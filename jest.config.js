@@ -22,7 +22,8 @@ module.exports = {
     '!src/Data/**',
     "!src/Navigation/**",
     '!src/Screens/SearchScreen.tsx/**',
-    '!src/Screens/ResultScreen.tsx/**'
+    '!src/Screens/ResultScreen.tsx/**',
+    '!src/toastConfig.js**',
   ],
 };
 

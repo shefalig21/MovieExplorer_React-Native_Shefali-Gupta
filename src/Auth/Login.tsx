@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View,Text,TextInput,TouchableOpacity,StyleSheet,Image,KeyboardAvoidingView,Platform,ScrollView,Keyboard,TouchableWithoutFeedback } from 'react-native';
-import { useNavigation,NavigationProp } from '@react-navigation/native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Platform } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { loginUser } from '../Api/AuthAPI';
 import { LoginResponse } from '../types/authTypes';
@@ -8,9 +8,9 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
 import { RootStackParamList } from '../types/NavigationTypes';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const Login = () => {
-
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -66,91 +66,86 @@ const Login = () => {
   };
 
   return (
-    <KeyboardAvoidingView
+  <View style={styles.container} testID="login-screen">
+
+    <View style={styles.imageContainer}>
+      <Image
+        source={require('../assets/images/login.png')}
+        style={styles.image}
+      />
+    </View>
+
+    <KeyboardAwareScrollView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      contentContainerStyle={{ flexGrow: 1 }}
+      keyboardShouldPersistTaps="handled"
+      enableOnAndroid={true}
     >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.container} testID="login-screen">
+      <View style={styles.innerContainer}>
+        <Text style={styles.title}>Welcome back</Text>
 
-            <View style={styles.imageContainer}>
-              <Image
-                source={require('../assets/images/login.png')}
-                style={styles.image}
-              />
-            </View>
+        <View style={styles.inputContainer}>
+          <TouchableOpacity style={styles.iconContainer}>
+            <Icon name="email" size={20} color="white" />
+          </TouchableOpacity>
 
-            <View style={styles.innerContainer}>
-              <Text style={styles.title}>Welcome back</Text>
+          <TextInput
+            testID="email-input"
+            style={styles.input}
+            placeholder="Enter Your Email"
+            placeholderTextColor="white"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+          />
+        </View>
 
-              <View style={styles.inputContainer}>
-                <TouchableOpacity style={styles.iconContainer}>
-                  <Icon name="email" size={20} color="white" />
-                </TouchableOpacity>
+        <View style={styles.inputContainer}>
+          <TouchableOpacity style={styles.iconContainer}>
+            <Icon name="lock" size={20} color="white" />
+          </TouchableOpacity>
 
-                <TextInput
-                  testID="email-input"
-                  style={styles.input}
-                  placeholder="Enter Your Email"
-                  placeholderTextColor="white"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  value={email}
-                  onChangeText={setEmail}
-                />
-              </View>
+          <TextInput
+            testID="password-input"
+            style={styles.input}
+            placeholder="Enter Your Password"
+            placeholderTextColor="white"
+            secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.eyeIcon}
+            testID="toggle-password-visibility"
+          >
+            <Icon name={showPassword ? 'visibility' : 'visibility-off'} size={24} color="white" />
+          </TouchableOpacity>
+        </View>
 
-              <View style={styles.inputContainer}>
-                <TouchableOpacity style={styles.iconContainer}>
-                  <Icon name="lock" size={20} color="white" />
-                </TouchableOpacity>
-
-                <TextInput
-                  testID="password-input"
-                  style={styles.input}
-                  placeholder="Enter Your Password"
-                  placeholderTextColor="white"
-                  secureTextEntry={!showPassword}
-                  autoCapitalize="none"
-                  value={password}
-                  onChangeText={setPassword}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                  style={styles.eyeIcon}
-                  testID="toggle-password-visibility"
-                >
-                  <Icon name={showPassword ? 'visibility' : 'visibility-off'} size={24} color="white" />
-                </TouchableOpacity>
-              </View>
-
-              {error ? (
-                <View style={styles.errorContainer}>
-                  <Icon name="error" size={20} color="white" style={styles.errorIcon} />
-                  <Text style={styles.errorText}>{error}</Text>
-                </View>
-              ) : null}
-
-              <TouchableOpacity style={styles.button} onPress={handleLogin} testID="login-button">
-                <Text style={styles.buttonText}>Login</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => navigation.navigate('Signup')} testID="signup-button">
-                <Text style={styles.SignupText}>
-                  Already have an account? <Text style={styles.SignupLink}>SignUp</Text>
-                </Text>
-              </TouchableOpacity>
-            </View>
-
+        {error ? (
+          <View style={styles.errorContainer}>
+            <Icon name="error" size={20} color="white" style={styles.errorIcon} />
+            <Text style={styles.errorText}>{error}</Text>
           </View>
-        </TouchableWithoutFeedback>
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
+        ) : null}
+
+        <TouchableOpacity style={styles.button} onPress={handleLogin} testID="login-button">
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Signup')} testID="signup-button">
+          <Text style={styles.SignupText}>
+            Already have an account? <Text style={styles.SignupLink}>SignUp</Text>
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAwareScrollView>
+    
+  </View>
+);
 };
 
 export default Login;
@@ -241,61 +236,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

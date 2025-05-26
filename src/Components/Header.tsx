@@ -11,12 +11,6 @@ const Header=({navigation}: HeaderProps)=>{
         <View style={styles.leftSection}>
           <Image source={require('../assets/images/logo5.png')} style={styles.logo} testID="logo-image"/>
         </View>
-
-        <View style={styles.rightSection}>
-          <TouchableOpacity>
-            <Icon name="notifications" size={24} color="#fff" testID="notification-button"/>
-          </TouchableOpacity>
-        </View>
       </View>
 
     </View>
