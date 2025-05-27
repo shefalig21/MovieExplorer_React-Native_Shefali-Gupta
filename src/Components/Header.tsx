@@ -1,48 +1,40 @@
 import React from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { View, Image, StyleSheet } from 'react-native';
 import { HeaderProps } from '../types/NavigationTypes';
 
-const Header=({navigation}: HeaderProps)=>{
-  return(
+const Header = ({ navigation }: HeaderProps) => {
+  return (
     <View style={styles.container}>
-   
-      <View style={styles.Row}>
-        <View style={styles.leftSection}>
-          <Image source={require('../assets/images/logo5.png')} style={styles.logo} testID="logo-image"/>
-        </View>
+      <View style={styles.row}>
+        <Image
+          source={require('../assets/images/lg2.png')}
+          style={styles.logo}
+          testID="logo-image"
+        />
       </View>
-
     </View>
   );
 };
 
 export default Header;
 
-const styles=StyleSheet.create({
-  container:{
-    backgroundColor: '#0C0F14',
-    paddingVertical: 10,
+const styles = StyleSheet.create({
+  container: {
+    paddingTop: 35,
+    paddingBottom: 10,
     paddingHorizontal: 14,
-    marginTop:20,
   },
-  Row:{
+  row: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    alignItems: 'center',     
   },
-  leftSection:{
-    flex: 1,
-  },
-  logo:{
+  logo: {
     width: 150,
-    height: 120,
+    height: 50,
     resizeMode: 'contain',
   },
-  rightSection:{
-    flexDirection: 'row',
-    gap: 20,
-    alignItems: 'center',
-  },
 });
+
+
 

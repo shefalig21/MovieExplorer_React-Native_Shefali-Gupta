@@ -80,7 +80,7 @@ const styles=StyleSheet.create({
   carouselContainer:{
     backgroundColor: '#0C0F14',
     alignItems: 'center',
-    marginTop: -30,
+    marginTop: -60,
   },
   card:{
     borderRadius: 20,

@@ -89,7 +89,7 @@ export default MoviesList;
 
 const styles=StyleSheet.create({
   container:{
-    marginVertical: 20,
+    marginBottom: 40,
   },
   heading:{
     fontSize: 18,
