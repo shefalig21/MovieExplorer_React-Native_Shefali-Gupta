@@ -1,15 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Keyboard, ScrollView, FlatList } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import { View,Text,TextInput,TouchableOpacity,StyleSheet,SafeAreaView,Keyboard,ScrollView,FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
-import AsyncStorage from '@react-native-async-storage/async-storage'; 
-import { Genre, DropdownType } from '../types/SearchScreenType';
-import { Genres, Ratings, Years } from '../Data/constants';
-import { SearchScreenNavigationProp } from '../types/SearchScreenType';
-import { fetchMoviesBySearch } from '../Api/MoviesAPI';
-
-const RECENT_SEARCHES_KEY = 'RECENT_SEARCHES_KEY';  
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Genre,DropdownType,SearchScreenNavigationProp } from '../types/SearchScreenType';
+import {Genres, Ratings, Years} from '../Data/constants';
+import {fetchMoviesBySearch} from '../Api/MoviesAPI';
 
 const SearchScreen = () => {
   const navigation = useNavigation<SearchScreenNavigationProp>();
@@ -19,61 +16,67 @@ const SearchScreen = () => {
   const [selectedRating, setSelectedRating] = useState('');
   const [activeDropdown, setActiveDropdown] = useState<DropdownType>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [suggestions, setSuggestions] = useState<any[]>([]); 
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  const getRecentSearchesKey = (email: string) => `recent_searches_${email}`;
 
   useEffect(() => {
-    (async () => {
+    const loadUserEmailAndSearches = async () => {
       try {
-        const stored = await AsyncStorage.getItem(RECENT_SEARCHES_KEY);
-        if (stored) {
-          setRecentSearches(JSON.parse(stored));
+        const email = await AsyncStorage.getItem('userEmail');
+        setUserEmail(email);
+
+        if (email) {
+          const saved = await AsyncStorage.getItem(getRecentSearchesKey(email));
+          if (saved) {
+            setRecentSearches(JSON.parse(saved));
+          }
         }
-      } catch (e) {
-        console.error('Failed to load recent searches', e);
+      } catch (err) {
+        console.error('Failed to load user email or recent searches', err);
       }
-    })();
+    };
+    loadUserEmailAndSearches();
   }, []);
 
   useEffect(() => {
-    (async () => {
-      try {
-        await AsyncStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(recentSearches));
-      } catch (e) {
-        console.error('Failed to save recent searches', e);
-      }
-    })();
-  }, [recentSearches]);
+    const handler = setTimeout(() => {
+      const fetchSuggestions = async () => {
+        if (searchText.trim() === '') {
+          setSuggestions([]);
+          return;
+        }
+        try {
+          const data = await fetchMoviesBySearch(searchText);
+          setSuggestions(data.movies || []);
+        } catch {
+          setSuggestions([]);
+        }
+      };
+      fetchSuggestions();
+    }, 400);
 
-  useEffect(() => {
-  const handler = setTimeout(() => {
-    const fetchSuggestions = async () => {
-      if (searchText.trim() === '') {
-        setSuggestions([]);
-        return;
-      }
-      try {
-        const data = await fetchMoviesBySearch(searchText);
-        setSuggestions(data.movies || []);
-      } catch (err) {
-        setSuggestions([]);
-      }
-    };
+    return () => clearTimeout(handler);
+  }, [searchText]);
 
-    fetchSuggestions();
-  }, 400);
-});
+  const saveRecentSearches = async (searches: string[]) => {
+    if (userEmail) {
+      await AsyncStorage.setItem(
+        getRecentSearchesKey(userEmail),
+        JSON.stringify(searches),
+      );
+    }
+  };
 
   const handleSearch = () => {
     Keyboard.dismiss();
+    if (searchText.trim() === '') return;
 
-    if (searchText.trim() !== '') {
-      setRecentSearches(prev => {
-        const updated = [searchText, ...prev.filter(item => item !== searchText)];
-        return updated.slice(0, 10); 
-      });
-    }
-
+    const updated = [searchText, ...recentSearches.filter(item => item !== searchText)].slice(0, 10);
+    setRecentSearches(updated);
+    saveRecentSearches(updated);
     setIsTyping(false);
 
     navigation.navigate('ResultScreen', {
@@ -85,12 +88,14 @@ const SearchScreen = () => {
   };
 
   const handleRemoveSearch = (text: string) => {
-    setRecentSearches(prev => prev.filter(item => item !== text));
+    const updated = recentSearches.filter(item => item !== text);
+    setRecentSearches(updated);
+    saveRecentSearches(updated);
   };
 
   const handleGenreSelect = (genre: string) => {
     setSelectedGenre(genre);
-    navigation.navigate('ResultScreen', { searchText, genre });
+    navigation.navigate('ResultScreen', {searchText, genre});
   };
 
   const handleSuggestionPress = (title: string) => {
@@ -105,7 +110,7 @@ const SearchScreen = () => {
     });
   };
 
-  const renderGenreButton = ({ item }: { item: Genre }) => (
+  const renderGenreButton = ({item}: {item: Genre}) => (
     <TouchableOpacity
       key={item.label}
       testID={`genre-${item.label}`}
@@ -126,7 +131,9 @@ const SearchScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container} testID="search-screen">
         <View style={styles.searchRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()} testID="back-arrow">
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            testID="back-arrow">
             <Icon name="arrow-back" size={26} color="#fff" />
           </TouchableOpacity>
 
@@ -140,10 +147,7 @@ const SearchScreen = () => {
                 setSearchText(text);
                 setIsTyping(true);
               }}
-              onSubmitEditing={() => {
-                handleSearch();
-                setIsTyping(false);
-              }}
+              onSubmitEditing={handleSearch}
               returnKeyType="search"
               style={styles.searchInput}
             />
@@ -162,12 +166,11 @@ const SearchScreen = () => {
           <View style={styles.suggestionsContainer}>
             <FlatList
               data={suggestions}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
+              keyExtractor={item => item.id.toString()}
+              renderItem={({item}) => (
                 <TouchableOpacity
                   style={styles.suggestionItem}
                   onPress={() => handleSuggestionPress(item.title)}>
-            
                   <Text style={styles.suggestionText}>{item.title}</Text>
                 </TouchableOpacity>
               )}
@@ -175,138 +178,145 @@ const SearchScreen = () => {
           </View>
         )}
 
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.genreContainer}>
-            {Genres.map(item => renderGenreButton({ item }))}
-          </View>
+        <View style={styles.genreContainer}>
+          {Genres.map(item => renderGenreButton({item}))}
+        </View>
 
-          <Text style={styles.dropdownLabel}>Release Year</Text>
-          <View style={styles.dropdownContainer}>
-            <TouchableOpacity
-              style={styles.dropdownButton}
-              testID="dropdown-year"
-              onPress={() =>
-                setActiveDropdown(activeDropdown === 'year' ? null : 'year')
-              }>
-              <Text style={styles.dropdownText}>
-                {selectedYear || 'Select Year'}
-              </Text>
-              <Icon
-                name={
-                  activeDropdown === 'year'
-                    ? 'keyboard-arrow-up'
-                    : 'keyboard-arrow-down'
-                }
-                size={24}
-                color="#fff"
-              />
-            </TouchableOpacity>
+        <Text style={styles.dropdownLabel}>Release Year</Text>
+        <View style={styles.dropdownContainer}>
+          <TouchableOpacity
+            style={styles.dropdownButton}
+            testID="dropdown-year"
+            onPress={() =>
+              setActiveDropdown(activeDropdown === 'year' ? null : 'year')
+            }>
+            <Text style={styles.dropdownText}>
+              {selectedYear || 'Select Year'}
+            </Text>
+            <Icon
+              name={
+                activeDropdown === 'year'
+                  ? 'keyboard-arrow-up'
+                  : 'keyboard-arrow-down'
+              }
+              size={24}
+              color="#fff"
+            />
+          </TouchableOpacity>
 
-            {activeDropdown === 'year' && (
-              <View style={styles.dropdown}>
-                <ScrollView style={styles.scrollableDropdown}>
+          {activeDropdown === 'year' && (
+            <View style={styles.dropdown}>
+              <ScrollView style={styles.scrollableDropdown}>
+                <TouchableOpacity
+                  style={styles.dropdownItem}
+                  onPress={() => {
+                    setSelectedYear('');
+                    setActiveDropdown(null);
+                  }}>
+                  <Text style={styles.dropdownItemText}>Select Year</Text>
+                </TouchableOpacity>
+                {Years.map(year => (
                   <TouchableOpacity
+                    key={year}
+                    testID={`dropdown-year-${year}`}
                     style={styles.dropdownItem}
                     onPress={() => {
-                      setSelectedYear('');
+                      setSelectedYear(year);
                       setActiveDropdown(null);
+                      navigation.navigate('ResultScreen', {year});
                     }}>
-                    <Text style={styles.dropdownItemText}>Select Year</Text>
+                    <Text style={styles.dropdownItemText}>{year}</Text>
                   </TouchableOpacity>
-                  {Years.map(year => (
-                    <TouchableOpacity
-                      key={year}
-                      style={styles.dropdownItem}
-                      testID={`dropdown-year-${year}`}
-                      onPress={() => {
-                        setSelectedYear(year);
-                        setActiveDropdown(null);
-                        navigation.navigate('ResultScreen', { year });
-                      }}>
-                      <Text style={styles.dropdownItemText}>{year}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            )}
-          </View>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+        </View>
 
-          <Text style={styles.dropdownLabel}>Rating</Text>
-          <View style={styles.dropdownContainer}>
-            <TouchableOpacity
-              style={styles.dropdownButton}
-              testID="dropdown-rating"
-              onPress={() =>
-                setActiveDropdown(activeDropdown === 'rating' ? null : 'rating')
-              }>
-              <Text style={styles.dropdownText}>
-                {selectedRating || 'Select Rating'}
-              </Text>
-              <Icon
-                name={
-                  activeDropdown === 'rating'
-                    ? 'keyboard-arrow-up'
-                    : 'keyboard-arrow-down'
-                }
-                size={24}
-                color="#fff"
-              />
-            </TouchableOpacity>
+        <Text style={styles.dropdownLabel}>Rating</Text>
+        <View style={styles.dropdownContainer}>
+          <TouchableOpacity
+            style={styles.dropdownButton}
+            testID="dropdown-rating"
+            onPress={() =>
+              setActiveDropdown(activeDropdown === 'rating' ? null : 'rating')
+            }>
+            <Text style={styles.dropdownText}>
+              {selectedRating || 'Select Rating'}
+            </Text>
+            <Icon
+              name={
+                activeDropdown === 'rating'
+                  ? 'keyboard-arrow-up'
+                  : 'keyboard-arrow-down'
+              }
+              size={24}
+              color="#fff"
+            />
+          </TouchableOpacity>
 
-            {activeDropdown === 'rating' && (
-              <View style={styles.dropdown}>
-                <ScrollView style={styles.scrollableDropdown}>
+          {activeDropdown === 'rating' && (
+            <View style={styles.dropdown}>
+              <ScrollView style={styles.scrollableDropdown}>
+                <TouchableOpacity
+                  style={styles.dropdownItem}
+                  onPress={() => {
+                    setSelectedRating('');
+                    setActiveDropdown(null);
+                  }}>
+                  <Text style={styles.dropdownItemText}>Select Rating</Text>
+                </TouchableOpacity>
+                {Ratings.map(rating => (
                   <TouchableOpacity
+                    key={rating}
+                    testID={`dropdown-rating-${rating}`}
                     style={styles.dropdownItem}
                     onPress={() => {
-                      setSelectedRating('');
+                      setSelectedRating(rating);
                       setActiveDropdown(null);
+                      navigation.navigate('ResultScreen', {rating});
                     }}>
-                    <Text style={styles.dropdownItemText}>Select Rating</Text>
+                    <Text style={styles.dropdownItemText}>{rating}</Text>
                   </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+        </View>
 
-                  {Ratings.map(rating => (
-                    <TouchableOpacity
-                      key={rating}
-                      testID={`dropdown-rating-${rating}`}
-                      style={styles.dropdownItem}
-                      onPress={() => {
-                        setSelectedRating(rating);
-                        setActiveDropdown(null);
-                        navigation.navigate('ResultScreen', { rating });
-                      }}>
-                      <Text style={styles.dropdownItemText}>{rating}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            )}
-          </View>
-
-          {recentSearches.length > 0 && (
-            <View style={{ marginTop: 20 }}>
-              <Text style={styles.recentSearchesHeading}>Recent Searches</Text>
-              {recentSearches.map(item => (
+        {recentSearches.length > 0 && (
+          <View style={{marginTop: 20}}>
+            <Text style={styles.recentSearchesHeading}>Recent Searches</Text>
+            <FlatList
+              data={recentSearches}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({item}) => (
                 <View key={item} style={styles.recentItemNoBg}>
-                  <Icon name="search" size={20} color="#fff" style={{ marginRight: 12 }} />
+                  <Icon
+                    name="search"
+                    size={20}
+                    color="#fff"
+                    style={{marginRight: 12}}
+                  />
                   <Text style={styles.recentText}>{item}</Text>
                   <TouchableOpacity
                     testID={`remove-${item}`}
                     onPress={() => handleRemoveSearch(item)}
-                    style={{ marginLeft: 'auto' }}>
+                    style={{marginLeft: 'auto'}}>
                     <Icon name="close" size={20} color="#fff" />
                   </TouchableOpacity>
                 </View>
-              ))}
-            </View>
-          )}
-        </ScrollView>
+              )}
+            />
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
 };
 
 export default SearchScreen;
+
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -322,8 +332,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 16,
-    marginTop: 20,
-    marginBottom: 15,
   },
   searchInputWrapper: {
     flex: 1,
@@ -335,7 +343,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1f1f1f',
     borderRadius: 25,
     paddingHorizontal: 16,
-    paddingRight: 40,  
+    paddingRight: 40,
     color: '#fff',
     fontSize: 16,
     marginLeft: 15,
@@ -345,7 +353,20 @@ const styles = StyleSheet.create({
     right: 25,
     height: 48,
     justifyContent: 'center',
-    alignItems: 'center',
+  },
+  suggestionsContainer: {
+    maxHeight: 200,
+    backgroundColor: '#1f1f1f',
+    borderRadius: 10,
+    marginTop: 10,
+    padding: 10,
+  },
+  suggestionItem: {
+    paddingVertical: 8,
+  },
+  suggestionText: {
+    color: '#fff',
+    fontSize: 16,
   },
   genreContainer: {
     flexDirection: 'row',
@@ -377,82 +398,60 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
+  dropdownLabel: {
+    color: '#fff',
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   dropdownContainer: {
-    marginBottom: 10,
+    marginTop: 8,
   },
   dropdownButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     backgroundColor: '#1f1f1f',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
   },
   dropdownText: {
     color: '#fff',
     fontSize: 16,
   },
   dropdown: {
-    backgroundColor: '#1f1f1f',
+    backgroundColor: '#2f2f2f',
     borderRadius: 8,
-    marginTop: 8,
+    marginTop: 4,
+    maxHeight: 180,
   },
   scrollableDropdown: {
-    maxHeight: 150,
+    maxHeight: 180,
   },
   dropdownItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    padding: 12,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#444',
   },
   dropdownItemText: {
     color: '#fff',
-    fontSize: 16,
   },
   recentSearchesHeading: {
-    color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
+    color: '#fff',
     marginBottom: 10,
   },
   recentItemNoBg: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 6,
+    paddingVertical: 8,
   },
   recentText: {
     color: '#fff',
     fontSize: 16,
   },
-  suggestionsContainer: {
-    maxHeight: 200,
-    backgroundColor: '#1f1f1f',
-    borderRadius: 8,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-  },
-  suggestionItem: {
-    paddingVertical: 10,
-    borderBottomColor: '#333',
-    borderBottomWidth: 1,
-  },
-  suggestionText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-   dropdownLabel: {        
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 3,
-    marginLeft: 13,
-  },
 });
-
-
-
-
 
 
 

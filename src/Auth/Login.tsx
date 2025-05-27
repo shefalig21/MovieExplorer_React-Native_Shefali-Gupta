@@ -70,7 +70,7 @@ const Login = () => {
 
     <View style={styles.imageContainer}>
       <Image
-        source={require('../assets/images/login.png')}
+        source={require('../assets/images/login.webp')}
         style={styles.image}
       />
     </View>
